@@ -1,4 +1,4 @@
-const CACHE = "field-survey-v7";
+const CACHE = "field-survey-v8";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -26,8 +26,11 @@ self.addEventListener("activate", e => {
 // شبكة أولاً لصفحة التطبيق نفسها (لضمان آخر تحديث)، ثم تخزين مؤقت كاحتياط بدون إنترنت
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  // لصفحات الموقع نفسه: نتحقق من الخادم دائماً (يتجاوز تخزين GitHub المؤقت لمدة 10 دقائق)
+  const same = new URL(e.request.url).origin === self.location.origin;
+  const req = same ? new Request(e.request.url, {cache: "no-cache"}) : e.request;
   e.respondWith(
-    fetch(e.request)
+    fetch(req)
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy)).catch(()=>{});
