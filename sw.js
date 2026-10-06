@@ -1,4 +1,4 @@
-const CACHE = "field-survey-v8";
+const CACHE = "field-survey-v9";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -26,6 +26,9 @@ self.addEventListener("activate", e => {
 // شبكة أولاً لصفحة التطبيق نفسها (لضمان آخر تحديث)، ثم تخزين مؤقت كاحتياط بدون إنترنت
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  // الخرائط وأي مصدر خارجي غير مكتبات التطبيق: لا نتدخل (أسلس وأخف)
+  const u = new URL(e.request.url);
+  if (u.origin !== self.location.origin && u.hostname !== "cdnjs.cloudflare.com") return;
   // لصفحات الموقع نفسه: نتحقق من الخادم دائماً (يتجاوز تخزين GitHub المؤقت لمدة 10 دقائق)
   const same = new URL(e.request.url).origin === self.location.origin;
   const req = same ? new Request(e.request.url, {cache: "no-cache"}) : e.request;
